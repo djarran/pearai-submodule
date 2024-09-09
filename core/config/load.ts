@@ -145,6 +145,8 @@ function loadSerializedConfig(
     ideType === "vscode"
       ? [...defaultContextProvidersVsCode]
       : [...defaultContextProvidersJetBrains];
+
+  // Slash commands are only added for existing installs if config.json is empty.
   config.slashCommands ??=
     ideType === "vscode"
       ? [...defaultSlashCommandsVscode]
@@ -359,15 +361,15 @@ async function intermediateToFinalConfig(
               config.systemMessage,
             );
 
-          if (llm instanceof PearAIServer) {
-            llm.getCredentials = async () => {
-              return await ide.getPearAuth();
-            };
+            if (llm instanceof PearAIServer) {
+              llm.getCredentials = async () => {
+                return await ide.getPearAuth();
+              };
 
-            llm.setCredentials = async (auth: PearAuth) => {
-              await ide.updatePearCredentials(auth);
-            };
-          }
+              llm.setCredentials = async (auth: PearAuth) => {
+                await ide.updatePearCredentials(auth);
+              };
+            }
 
             // if (llm?.providerName === "free-trial") {
             //   if (!allowFreeTrial) {
@@ -548,15 +550,18 @@ function getTarget() {
 }
 
 function escapeSpacesInPath(p: string): string {
-  return p.split("").map(char => {
-    if (char === " ") {
-      return "\\ ";
-    } else if (char === "\\") {
-      return "\\\\";
-    } else {
-      return char;
-    }
-  }).join("");
+  return p
+    .split("")
+    .map((char) => {
+      if (char === " ") {
+        return "\\ ";
+      } else if (char === "\\") {
+        return "\\\\";
+      } else {
+        return char;
+      }
+    })
+    .join("");
 }
 
 async function buildConfigTs() {
@@ -604,10 +609,14 @@ async function buildConfigTs() {
 
 function enforceDefaultModels(config: SerializedContinueConfig): void {
   // check if all default models are present, add if not
-  const defaultModels = defaultConfig.models.filter(model => model.isDefault === true);
-  defaultModels.forEach(defaultModel => {
+  const defaultModels = defaultConfig.models.filter(
+    (model) => model.isDefault === true,
+  );
+  defaultModels.forEach((defaultModel) => {
     const modelExists = config.models.some(
-      configModel => configModel.title === defaultModel.title && configModel.provider === defaultModel.provider
+      (configModel) =>
+        configModel.title === defaultModel.title &&
+        configModel.provider === defaultModel.provider,
     );
 
     if (!modelExists) {
@@ -638,7 +647,7 @@ async function loadFullConfigNode(
   let intermediate = await serializedToIntermediateConfig(serialized, ide);
   // check and enforce default models
   enforceDefaultModels(serialized);
-  
+
   // Apply config.ts to modify intermediate config
   const configJsContents = await buildConfigTs();
   if (configJsContents) {
