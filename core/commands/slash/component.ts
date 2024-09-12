@@ -3,7 +3,7 @@ import { stripImages } from "../../llm/images.js";
 
 const ComponentMessageCommand: SlashCommand = {
   name: "component",
-  description: "Generate a component using v0",
+  description: "Generate a React component using v0",
   run: async function* ({ llm, input }) {
     if (input.trim() === "") {
       yield "Please provide a description of the React component you want to generate. For example, '/component Create a dashboard with a user table'.";
@@ -14,7 +14,7 @@ const ComponentMessageCommand: SlashCommand = {
 
 "${input}"
 
-Expand on the prompt to add more detail with bullet points. Do not include the command /component. Do not add information about styles (Material UI, bootstrap). Only use the template below in your response. The prompt in the markdown link must be properly URL encoded. Include new line encoding %0A. Ensure the bullet points have spaces between the dash and the first word.
+Expand on the prompt to add more details with bullet points. If a picture is attached as well, then make sure the description also aligns with the UI shown in the picture. We'll send the expanded prompt to a different API to generate the actual code for the component. Do not assume they will have knowledge of our files or filenames, so include whatever context needed in the bullet point descriptions. Do not include the command /component. Do not add information about styles (Material UI, bootstrap). Only use the template below in your response. The prompt in the markdown link must be properly URL encoded. Include new line encoding %0A. Ensure the bullet points have spaces between the dash and the first word.
 
 Response template:
 
